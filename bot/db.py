@@ -44,6 +44,10 @@ class Database:
         except Exception as e:
             print(f"Error updating user: {e}")
             return False
+        
+    def get_user_data_by_user_id(self, user_id):
+        user = _db.collection.find_one({"user_id": user_id})
+        return user
 
 _db = Database("Authenication", "Users")
 

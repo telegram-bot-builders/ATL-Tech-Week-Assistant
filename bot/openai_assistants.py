@@ -5,6 +5,37 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+
+# Get Scheduling Assistant
+def get_scheduling_assistant():
+    assistant = client.beta.assistants.retrieve("asst_335DCSiN4q59OM2OYIDOXbHH")
+    return assistant
+
+# create ATL Tech Week Schedule for attendees
+def create_atl_tech_week_schedule(data):
+    scheduling_assistant = get_scheduling_assistant()
+    # create a thread
+    thread = client.beta.threads.create()
+    message = client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="assistant",
+        content=f"Create a schedule for an attendee of Atlanta Tech Week 2024. The attendee is has the following data about themselves. They really need your assistance to tailor this schedule to their needs.:\n\n{data}",
+    )
+    run = client.beta.threads.runs.create_and_poll(
+        thread_id=thread.id,
+        assistant_id=scheduling_assistant.id,
+    )
+
+    if run.status == 'completed':
+        messages = client.beta.threads.messages.list(
+            thread_id=thread.id
+        )
+        return messages.data[0].content[0].text.value
+    else:
+        print(run.status)
+        return None
+    
+
 # Create Sign Up Assistant
 def create_sign_up_assistant():
     my_assistant = client.beta.assistants.create(

@@ -5,7 +5,7 @@ from crewai_tools import tool
 from dotenv import load_dotenv
 from agents import conversational_agent
 from crewai import Task, Crew, Process
-from openai_assistants import send_initial_onboarding_message, send_follow_up_onboarding_message, get_json_data_from_last_onboarding_message
+from openai_assistants import send_initial_onboarding_message, send_follow_up_onboarding_message, get_json_data_from_last_onboarding_message, create_atl_tech_week_schedule
 from db import _db
 import time, json, pprint
 
@@ -69,11 +69,27 @@ class Bot:
                 json_data["user_id"] = user_id
                 # update the user in the database with the onboarding data
                 if _db.update_user(json_data):
-                    await context.bot.send_message(chat_id=update.effective_chat.id, text=escape_markdown_v2("Thank you! Your ATL Tech Week Profile has been successfully created."),  parse_mode="MarkdownV2")
+                    await context.bot.send_message(chat_id=update.effective_chat.id, text=escape_markdown_v2("Thank you! Your ATL Tech Week Profile has been successfully created. Now, let's build your ATL Tech Week schedule! /build_schedule"),  parse_mode="MarkdownV2")
                 else:
                     await context.bot.send_message(chat_id=update.effective_chat.id, text=escape_markdown_v2("Sorry, there was an error processing your onboarding data. Please retry."),  parse_mode="MarkdownV2")
         else:
             await context.bot.send_message(chat_id=update.effective_chat.id, text=escape_markdown_v2("Sorry, you are not currently in the onboarding process."),  parse_mode="MarkdownV2")
+
+    async def build_schedule(self, update: Update, context: CallbackContext):
+        user_id = update.effective_user.id
+        user = _db.get_user_data_by_user_id(user_id)
+        if user:
+            # remove the user_id, mongodb id, and chat_id from the user data and then serialize it to json
+            user.pop("_id")
+            user.pop("user_id")
+            user.pop("chat_id")
+            user_data = json.dumps(user)
+            try:
+                schedule = create_atl_tech_week_schedule(user_data)
+                await context.bot.send_message(chat_id=update.effective_chat.id, text=escape_markdown_v2(schedule),  parse_mode="MarkdownV2")
+            except Exception as e:
+                print(f"Error building schedule: {e}")
+                await context.bot.send_message(chat_id=update.effective_chat.id, text=escape_markdown_v2("Sorry, there was an error building your ATL Tech Week schedule."),  parse_mode="MarkdownV2")
 
     async def handle_text_message(self, update: Update, context: CallbackContext):
         user_id = update.effective_user.id
@@ -115,6 +131,7 @@ class Bot:
         self.bot.add_handler(CommandHandler('start', self.start))
         self.bot.add_handler(CommandHandler('on_board', self.on_board))
         self.bot.add_handler(CommandHandler('end_onboarding', self.end_onboarding))
+        self.bot.add_handler(CommandHandler('build_schedule', self.build_schedule))
         # add a message handler with a filter for when user submits their linkedin profile link
         self.bot.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), self.handle_text_message))
         self.bot.run_polling()
