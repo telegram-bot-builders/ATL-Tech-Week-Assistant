@@ -1,5 +1,4 @@
 from crewai import Agent, Task, Crew, Process
-from crewai_tools import tool
 from telegram import Bot
 from dotenv import load_dotenv
 import pprint, os
@@ -20,19 +19,6 @@ TOKEN = os.getenv('TELEGRAM_API_KEY')
 async def send_msg_to_telegram(msg, chat_id):
     bot = Bot(token=TOKEN)
     await bot.send_message(chat_id=chat_id, text=msg, parse_mode="MarkdownV2")
-
-
-@tool("get_response")
-def get_response(question):
-  """The mechanism to get the user's response. Takes in a question and returns the user's response."""
-  print(question)
-  value = input("Enter your response: ")
-  return value
-
-def on_boarding_callback(step_output):
-  
-  for step in step_output:
-    print(step)
     
 
 conversational_agent = Agent(
@@ -66,7 +52,7 @@ conversational_agent = Agent(
 on_boarding_task= Task(
     description="Begin the onboarding process for Atlanta Tech Week 2024 attendees. Start with an engaging opener that automatically makes the user feel welcome and excited about the upcoming events. Say something smooth that makes them open up. You will use get the user responses to your questions by using the get_response(question) function, where the question is what you need the user to respond to.",
     expected_output='A json response of the parsed answers from the user.',
-    tools=[get_response],
+    tools=[],
     agent=conversational_agent,
 )
 
