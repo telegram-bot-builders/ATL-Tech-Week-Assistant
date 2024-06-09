@@ -2,7 +2,6 @@ from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandle
 from telegram import Update
 from telegram.ext import ApplicationBuilder
 from dotenv import load_dotenv
-from agents import conversational_agent
 from openai_assistants import send_initial_onboarding_message, send_follow_up_onboarding_message, get_json_data_from_last_onboarding_message, create_atl_tech_week_schedule
 from db import _db
 import time, json, pprint
