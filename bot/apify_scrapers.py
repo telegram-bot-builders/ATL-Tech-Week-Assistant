@@ -28,7 +28,7 @@ def scrape_linkedin_profile(url):
     for item in client.dataset(run["defaultDatasetId"]).iterate_items():
         results.append(item)
 
-    return results
+    return results[0]
 
 
 if __name__ == '__main__':

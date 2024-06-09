@@ -45,7 +45,7 @@ class Database:
             print(f"Error updating user: {e}")
             return False
 
-db = Database("Authenication", "Users")
+_db = Database("Authenication", "Users")
 
 if __name__ == '__main__':
     pass
