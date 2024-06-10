@@ -24,17 +24,6 @@ TOKEN = os.getenv('TELEGRAM_API_KEY')
 
 session_data = {}
 
-# @tool("get_response")
-# async def get_response(question):
-#     """The mechanism to get the user's response. Takes in a question and returns the user's response."""
-#     print(question)
-#     # print(question)
-#     # await context.bot.send_message(chat_id=update.effective_chat.id, text=question)
-#     # return "hello"
-#     value = input("Enter your response: ")
-#     # value = input("Enter your response: ")
-#     return value
-
 
 
 
